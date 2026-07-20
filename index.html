@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flappy Bird</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="game-shell">
+      <div class="hud">
+        <div class="score-badge">Score: <span id="scoreValue">0</span></div>
+      </div>
+      <canvas id="gameCanvas" width="480" height="700"></canvas>
+      <div id="overlay" class="overlay visible">
+        <h1>Oops! Try Again!</h1>
+        <p>Your score: <span id="finalScore">0</span></p>
+        <p>Press Space or Click to start</p>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
