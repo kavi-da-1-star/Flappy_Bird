@@ -1,8 +1,11 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const overlay = document.getElementById('overlay');
+const overlayHint = document.getElementById('overlayHint');
 const scoreValue = document.getElementById('scoreValue');
 const finalScore = document.getElementById('finalScore');
+const highScoreValue = document.getElementById('highScoreValue');
+const statusMessage = document.getElementById('statusMessage');
 
 const groundHeight = 90;
 const pipeWidth = 70;
@@ -14,15 +17,21 @@ const birdRadius = 22;
 const birdStartX = 140;
 const birdStartY = canvas.height / 2;
 
-let bird;
+let bird = {
+  x: birdStartX,
+  y: birdStartY,
+  velocity: 0,
+};
 let pipes = [];
 let score = 0;
+let highScore = Number(localStorage.getItem('flappyBirdHighScore') || 0);
 let gameOver = true;
 let started = false;
 let lastTime = 0;
 let pipeTimer = 0;
 let cloudOffset = 0;
 let sunPosition = 0;
+let statusTimer = null;
 
 function resetGame() {
   bird = {
@@ -47,6 +56,16 @@ function startGame() {
 function updateScore() {
   scoreValue.textContent = score;
   finalScore.textContent = score;
+  highScoreValue.textContent = highScore;
+}
+
+function showStatus(text, duration = 1200) {
+  statusMessage.textContent = text;
+  statusMessage.classList.add('visible');
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => {
+    statusMessage.classList.remove('visible');
+  }, duration);
 }
 
 function flap() {
@@ -108,8 +127,14 @@ function rectsOverlap(a, b) {
 
 function endGame() {
   if (gameOver) return;
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('flappyBirdHighScore', highScore);
+  }
+  updateScore();
   gameOver = true;
   started = false;
+  overlayHint.textContent = 'Press Space or Click to start';
   overlay.classList.add('visible');
 }
 
@@ -125,7 +150,12 @@ function update(dt) {
 
   pipes.forEach((pipe) => {
     pipe.x -= pipeSpeed * dt;
-    if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
+    if (
+      !pipe.passed &&
+      pipe.x + pipeWidth < bird.x &&
+      bird.y > pipe.topHeight &&
+      bird.y < pipe.topHeight + pipeGap
+    ) {
       pipe.passed = true;
       score += 1;
       updateScore();
@@ -301,6 +331,13 @@ window.addEventListener('keydown', (event) => {
   if (event.code === 'Space') {
     event.preventDefault();
     flap();
+  } else if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+    event.preventDefault();
+    showStatus(`High score: ${highScore}`);
+  } else if (event.code === 'ControlLeft' || event.code === 'ControlRight') {
+    event.preventDefault();
+    startGame();
+    showStatus('Game restarted');
   }
 });
 
